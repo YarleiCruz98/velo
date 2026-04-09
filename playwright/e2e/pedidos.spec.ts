@@ -32,8 +32,9 @@ test.describe('Order Lookup', () => {
             - img
             - paragraph: Pedido
             - paragraph: ${order.number}
-            - img
-            - text: ${order.status}
+            - status:
+                - img
+                - text: ${order.status}
             - img "Velô Sprint"
             - paragraph: Modelo
             - paragraph: Velô Sprint
@@ -56,6 +57,12 @@ test.describe('Order Lookup', () => {
             - paragraph: ${order.payment}
             - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
             `);
+
+        const statusBadge = page.getByRole('status').filter({ hasText: order.status });
+        await expect(statusBadge).toHaveClass(/bg-green-100 text-green-700/);
+
+        const statusIcon = statusBadge.locator('svg');
+        await expect(statusIcon).toHaveClass(/lucide-circle-check-big/);
     });
 
     test('should display an error message when the order is not found', async ({ page }) => {
@@ -93,8 +100,9 @@ test.describe('Order Lookup', () => {
             - img
             - paragraph: Pedido
             - paragraph: ${order.number}
-            - img
-            - text: ${order.status}
+            - status:
+                - img
+                - text: ${order.status}
             - img "Velô Sprint"
             - paragraph: Modelo
             - paragraph: Velô Sprint
@@ -117,6 +125,12 @@ test.describe('Order Lookup', () => {
             - paragraph: ${order.payment}
             - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
             `);
+
+        const statusBadge = page.getByRole('status').filter({ hasText: order.status });
+        await expect(statusBadge).toHaveClass(/bg-red-100 text-red-700/);
+
+        const statusIcon = statusBadge.locator('svg');
+        await expect(statusIcon).toHaveClass(/lucide-circle-x/);
     });
 
     test('should be able to search for an order in analysis', async ({ page }) => {
@@ -141,6 +155,9 @@ test.describe('Order Lookup', () => {
             - img
             - paragraph: Pedido
             - paragraph: ${order.number}
+            - status:
+                - img
+                - text: ${order.status}
             - img "Velô Sprint"
             - paragraph: Modelo
             - paragraph: Velô Sprint
@@ -163,5 +180,12 @@ test.describe('Order Lookup', () => {
             - paragraph: ${order.payment}
             - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
             `);
+
+        const statusBadge = page.getByRole('status').filter({ hasText: order.status });
+        await expect(statusBadge).toHaveClass(/bg-amber-100 text-amber-700/);
+
+        const statusIcon = statusBadge.locator('svg');
+        await expect(statusIcon).toHaveClass(/lucide-clock-icon/);
+
     });
 });
