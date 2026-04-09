@@ -1,16 +1,21 @@
 import { test, expect } from '@playwright/test';
+import { generateOrderNumber } from '../support/helpers';
+
 
 test('should be able to search for an order', async ({ page }) => {
+    //Test Data
+    const orderNumber = 'VLO-G26SII';
+
     await page.goto('/');
     await expect(page.getByRole('heading', { name: 'Velô Sprint', level: 1 })).toBeVisible({ timeout: 15_000 });
     await page.getByRole('link', { name: 'Consultar Pedido' }).click();
     await expect(page.getByRole('heading', { name: 'Consultar Pedido' })).toBeVisible();
-    await page.locator('//label[text()="Número do Pedido"]/..//input').fill('VLO-G26SII');
+    await page.locator('//label[text()="Número do Pedido"]/..//input').fill(orderNumber);
     await page.getByRole('button', { name: 'Buscar Pedido' }).click();
-    await expect(page.getByTestId('order-result-VLO-G26SII')).toMatchAriaSnapshot(`
+    await expect(page.getByTestId(`order-result-${orderNumber}`)).toMatchAriaSnapshot(`
         - img
         - paragraph: Pedido
-        - paragraph: VLO-G26SII
+        - paragraph: ${orderNumber}
         - img
         - text: APROVADO
         - img "Velô Sprint"
@@ -34,5 +39,22 @@ test('should be able to search for an order', async ({ page }) => {
         - heading "Pagamento" [level=4]
         - paragraph: À Vista
         - paragraph: /R\\$ \\d+\\.\\d+,\\d+/
+        `);
+});
+
+test('should display an error message when the order is not found', async ({ page }) => {
+    //Test Data
+    const orderNumber = generateOrderNumber();
+    
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'Velô Sprint', level: 1 })).toBeVisible({ timeout: 10_000 });
+    await page.getByRole('link', { name: 'Consultar Pedido' }).click();
+    await expect(page.getByRole('heading', { name: 'Consultar Pedido' })).toBeVisible();
+    await page.locator('//label[text()="Número do Pedido"]/..//input').fill(orderNumber);
+    await page.getByRole('button', { name: 'Buscar Pedido' }).click();
+    await expect(page.locator('#root')).toMatchAriaSnapshot(`
+        - img
+        - heading "Pedido não encontrado" [level=3]
+        - paragraph: Verifique o número do pedido e tente novamente
         `);
 });
