@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
-import { generateOrderNumber } from '../support/helpers';
+import { generateOrderNumber} from '../support/helpers';
+import { SearchOrderPage } from '../support/pages/SearchOrderPage';
 
 test.describe('Order Lookup', () => {
 
@@ -8,6 +9,7 @@ test.describe('Order Lookup', () => {
         await expect(page.getByRole('heading', { name: 'Velô Sprint', level: 1 })).toBeVisible({ timeout: 15_000 });
         await page.getByRole('link', { name: 'Consultar Pedido' }).click();
         await expect(page.getByRole('heading', { name: 'Consultar Pedido' })).toBeVisible();
+
     });
 
     test('should be able to search for an approved order', async ({ page }) => {
@@ -25,9 +27,9 @@ test.describe('Order Lookup', () => {
             store: 'Loja de Retirada',
             payment: 'À Vista',
         };
-
-        await page.locator('//label[text()="Número do Pedido"]/..//input').fill(order.number);
-        await page.getByRole('button', { name: 'Buscar Pedido' }).click();
+        const searchOrderPage = new SearchOrderPage(page);
+        await searchOrderPage.searchOrder(order.number);   
+         
         await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
             - img
             - paragraph: Pedido
@@ -69,8 +71,9 @@ test.describe('Order Lookup', () => {
         //Test Data
         const orderNumber = generateOrderNumber();
 
-        await page.locator('//label[text()="Número do Pedido"]/..//input').fill(orderNumber);
-        await page.getByRole('button', { name: 'Buscar Pedido' }).click();
+        const searchOrderPage = new SearchOrderPage(page);
+        await searchOrderPage.searchOrder(orderNumber);
+
         await expect(page.locator('#root')).toMatchAriaSnapshot(`
             - img
             - heading "Pedido não encontrado" [level=3]
@@ -94,8 +97,9 @@ test.describe('Order Lookup', () => {
             payment: 'À Vista',
         };
 
-        await page.locator('//label[text()="Número do Pedido"]/..//input').fill(order.number);
-        await page.getByRole('button', { name: 'Buscar Pedido' }).click();
+        const searchOrderPage = new SearchOrderPage(page);
+        await searchOrderPage.searchOrder(order.number);
+
         await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
             - img
             - paragraph: Pedido
@@ -149,8 +153,9 @@ test.describe('Order Lookup', () => {
             payment: 'À Vista',
         };
 
-        await page.locator('//label[text()="Número do Pedido"]/..//input').fill(order.number);
-        await page.getByRole('button', { name: 'Buscar Pedido' }).click();
+        const searchOrderPage = new SearchOrderPage(page);
+        await searchOrderPage.searchOrder(order.number);
+
         await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
             - img
             - paragraph: Pedido
