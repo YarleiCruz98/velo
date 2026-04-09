@@ -29,7 +29,7 @@ test.describe('Order Lookup', () => {
         };
         const searchOrderPage = new SearchOrderPage(page);
         await searchOrderPage.searchOrder(order.number);   
-         
+
         await expect(page.getByTestId(`order-result-${order.number}`)).toMatchAriaSnapshot(`
             - img
             - paragraph: Pedido
@@ -65,20 +65,6 @@ test.describe('Order Lookup', () => {
 
         const statusIcon = statusBadge.locator('svg');
         await expect(statusIcon).toHaveClass(/lucide-circle-check-big/);
-    });
-
-    test('should display an error message when the order is not found', async ({ page }) => {
-        //Test Data
-        const orderNumber = generateOrderNumber();
-
-        const searchOrderPage = new SearchOrderPage(page);
-        await searchOrderPage.searchOrder(orderNumber);
-
-        await expect(page.locator('#root')).toMatchAriaSnapshot(`
-            - img
-            - heading "Pedido não encontrado" [level=3]
-            - paragraph: Verifique o número do pedido e tente novamente
-            `);
     });
 
     test('should be able to search for a reproved order', async ({ page }) => {
@@ -192,5 +178,19 @@ test.describe('Order Lookup', () => {
         const statusIcon = statusBadge.locator('svg');
         await expect(statusIcon).toHaveClass(/lucide-clock-icon/);
 
+    });
+
+    test('should display an error message when the order is not found', async ({ page }) => {
+        //Test Data
+        const orderNumber = generateOrderNumber();
+
+        const searchOrderPage = new SearchOrderPage(page);
+        await searchOrderPage.searchOrder(orderNumber);
+
+        await expect(page.locator('#root')).toMatchAriaSnapshot(`
+            - img
+            - heading "Pedido não encontrado" [level=3]
+            - paragraph: Verifique o número do pedido e tente novamente
+            `);
     });
 });
