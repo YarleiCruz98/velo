@@ -1,28 +1,27 @@
-import { test, expect } from '@playwright/test'
+import { test } from '@playwright/test'
 
 import { generateOrderCode } from '../support/helpers'
 
+import { Navbar } from '../support/components/Navbar'
+
+import { LandingPage } from '../support/pages/LandingPage'
 import { SearchOrderPage } from '../support/pages/SearchOrderPage'
 
-/// AAA - Arrange, Act, Assert
+test.describe('Consulta de Pedido', () => {
 
-test.describe('Search Order', () => {
+  let searchOrderPage: SearchOrderPage
 
   test.beforeEach(async ({ page }) => {
-    // Arrange
-    await page.goto('http://localhost:5173/')
-    await expect(page.getByTestId('hero-section').getByRole('heading')).toContainText('Velô Sprint')
+    await new LandingPage(page).gotoLandingPage()
+    await new Navbar(page).searchOrderLink()
 
-    await page.getByRole('link', { name: 'Consultar Pedido' }).click()
-    await expect(page.getByRole('heading')).toContainText('Consultar Pedido')
+    searchOrderPage = new SearchOrderPage(page)
   })
 
   test('should search an approved order', async ({ page }) => {
-
-    // Test Data
-    const order = {
+    const order: any = {
       number: 'VLO-G26SII',
-      status: 'APROVADO' as const,
+      status: 'APROVADO',
       color: 'Glacier Blue',
       wheels: 'aero Wheels',
       customer: {
@@ -32,24 +31,16 @@ test.describe('Search Order', () => {
       payment: 'À Vista'
     }
 
-    // Act  
-    const searchOrderPage = new SearchOrderPage(page)   
     await searchOrderPage.searchOrder(order.number)
 
-    // Assert
     await searchOrderPage.validateOrderResult(order)
-
-    // Validation of status badge encapsulated in the Page Object
     await searchOrderPage.validateStatusBadge(order.status)
-
   })
 
   test('should search a rejected order', async ({ page }) => {
-
-    // Test Data
-    const order = {
+    const order: any = {
       number: 'VLO-RQY8GO',
-      status: 'REPROVADO' as const,
+      status: 'REPROVADO',
       color: 'Midnight Black',
       wheels: 'sport Wheels',
       customer: {
@@ -59,23 +50,16 @@ test.describe('Search Order', () => {
       payment: 'À Vista'
     }
 
-    // Act  
-    const searchOrderPage = new SearchOrderPage(page)
     await searchOrderPage.searchOrder(order.number)
 
-    // Assert
     await searchOrderPage.validateOrderResult(order)
-
-    // Validation of status badge encapsulated in the Page Object
     await searchOrderPage.validateStatusBadge(order.status)
   })
 
   test('should search an order in analysis', async ({ page }) => {
-
-    // Test Data
-    const order = {
+    const order: any = {
       number: 'VLO-ACOIOU',
-      status: 'EM_ANALISE' as const,
+      status: 'EM_ANALISE',
       color: 'Lunar White',
       wheels: 'aero Wheels',
       customer: {
@@ -85,40 +69,23 @@ test.describe('Search Order', () => {
       payment: 'À Vista'
     }
 
-    // Act  
-    const searchOrderPage = new SearchOrderPage(page)
     await searchOrderPage.searchOrder(order.number)
 
-    // Assert
     await searchOrderPage.validateOrderResult(order)
-
-    // Validation of status badge encapsulated in the Page Object
     await searchOrderPage.validateStatusBadge(order.status)
   })
 
   test('should display an error message when the order is not found', async ({ page }) => {
-
-    // Test Data
     const order = generateOrderCode()
 
-    // Act
-    const searchOrderPage = new SearchOrderPage(page)
     await searchOrderPage.searchOrder(order)
-
-    // Assert
     await searchOrderPage.validateErrorMessage()
   })
 
   test('should display an error message when the order number format is invalid', async ({ page }) => {
+    const orderCode = 'ABC123'
 
-    // Test Data
-    const order = 'ABC123'
-
-    // Act
-    const searchOrderPage = new SearchOrderPage(page)
-    await searchOrderPage.searchOrder(order)
-
-    // Assert
+    await searchOrderPage.searchOrder(orderCode)
     await searchOrderPage.validateErrorMessage()
   })
 })
