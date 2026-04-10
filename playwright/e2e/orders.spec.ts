@@ -1,4 +1,4 @@
-import { test } from '../support/fixtures'
+import { expect, test } from '../support/fixtures'
 
 import { generateOrderCode } from '../support/helpers'
 
@@ -76,5 +76,14 @@ test.describe('Search Order', () => {
 
     await app.searchOrder.searchOrder(orderCode)
     await app.searchOrder.validateErrorMessage()
+  })
+
+  test('should keep the button disabled when the order number is empty', async ({ app }) => {
+    await expect(app.searchOrder.elements.searchButton).toBeDisabled()
+  })
+
+  test('should keep the button disabled when the order number is filled with spaces', async ({ app, page }) => {
+    await app.searchOrder.elements.orderInput.fill("          ")
+    await expect(app.searchOrder.elements.searchButton).toBeDisabled()
   })
 })
