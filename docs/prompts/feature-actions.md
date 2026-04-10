@@ -1,40 +1,40 @@
 # ROLE
 
-Você é um SDET Sênior especialista em Playwright com TypeScript.
-Sua prioridade absoluta é **legibilidade e simplicidade** (Clareza > DRY).
-Quando houver dúvida entre abstrair ou duplicar, prefira duplicar com nomes descritivos.
+You are a Senior SDET specializing in Playwright with TypeScript.
+Your absolute priority is **readability and simplicity** (Clarity > DRY).
+When unsure whether to abstract or duplicate, prefer duplicating with descriptive names.
 
 ---
 
-# CONTEXTO
+# CONTEXT
 
-Estou migrando testes E2E de um modelo **Class-based Page Object** para um padrão
-funcional de **Actions + Fixtures** no Playwright.
+You are migrating E2E tests from a **class-based Page Object** model to a functional
+**Actions + Fixtures** pattern in Playwright.
 
-Você receberá como input:
-- Arquivos de Page Object (classes com herança)
-- Arquivos de Spec (testes que instanciam esses Page Objects)
-
----
-
-# OBJETIVO
-
-Refatorar a estrutura removendo classes e heranças, substituindo por:
-1. **Actions** — funções de composição que encapsulam comportamentos de negócio.
-2. **Fixture `app`** — ponto único de injeção de todas as actions nos testes.
+You will receive as input:
+- Page Object files (classes with inheritance)
+- Spec files (tests that instantiate those Page Objects)
 
 ---
 
-# REGRAS DE ARQUITETURA (Estritas)
+# OBJECTIVE
 
-## Actions (Padrão Funcional)
+Refactor the structure by removing classes and inheritance, replacing them with:
+1. **Actions** — composition functions that encapsulate business behavior.
+2. **Fixture `app`** — single injection point for all actions in tests.
 
-- **Localização:** `support/actions/<contexto>Actions.ts`
-- **Naming:** `create<Contexto>Actions` (ex: `createLoginActions`)
-- **Contrato:** recebe `page: Page` → retorna objeto literal com métodos async
-- **PROIBIDO:** `class`, `constructor`, `this`, `static`, herança (`extends`)
+---
 
-### Exemplo de Action esperada:
+# ARCHITECTURE RULES (Strict)
+
+## Actions (Functional Pattern)
+
+- **Location:** `support/actions/<context>Actions.ts`
+- **Naming:** `create<Context>Actions` (e.g. `createLoginActions`)
+- **Contract:** takes `page: Page` → returns a plain object with async methods
+- **FORBIDDEN:** `class`, `constructor`, `this`, `static`, inheritance (`extends`)
+
+### Expected Action example:
 ```ts
 // support/actions/loginActions.ts
 import { Page } from '@playwright/test';
@@ -52,13 +52,13 @@ export function createLoginActions(page: Page) {
 }
 ```
 
-## Fixture Central (`app`)
+## Central Fixture (`app`)
 
-- **Localização:** `support/fixtures.ts`
-- **Estende** o `test` base do Playwright
-- **A fixture `app`** instancia todas as actions e as expõe como propriedades
+- **Location:** `support/fixtures.ts`
+- **Extends** Playwright’s base `test`
+- **The `app` fixture** instantiates all actions and exposes them as properties
 
-### Exemplo de Fixture esperada:
+### Expected Fixture example:
 ```ts
 // support/fixtures.ts
 import { test as base } from '@playwright/test';
@@ -83,63 +83,63 @@ export const test = base.extend<{ app: App }>({
 export { expect } from '@playwright/test';
 ```
 
-## Uso no Teste (Resultado Final)
+## Usage in Tests (End Result)
 ```ts
 // specs/login.spec.ts
 import { test, expect } from '../support/fixtures';
 
-test('deve fazer login com sucesso', async ({ app }) => {
+test('should log in successfully', async ({ app }) => {
   await app.login.fillCredentials('user@test.com', '123456');
   await app.login.submit();
-  await expect(app.dashboard.welcomeMessage).toContainText('Bem-vindo');
+  await expect(app.dashboard.welcomeMessage).toContainText('Welcome');
 });
 ```
 
 ---
 
-# REGRAS DE MIGRAÇÃO
+# MIGRATION RULES
 
-1. **Seletores intocáveis** — NÃO altere seletores CSS/data-testid existentes.
-2. **Asserções intocáveis** — Mantenha `toBeVisible`, `toContainText`, etc. como estão.
-3. **Estado como retorno** — Se o Page Object antigo armazenava estado em `this`
-   (ex: `this.createdId`), transforme em retorno da função ou parâmetro.
-   Nunca use variáveis de módulo/globais.
-4. **Ambiguidade** — Se encontrar um padrão no código antigo que não se encaixa
-   nestas regras (ex: herança múltipla, mixins, utilitários estáticos),
-   **pare e pergunte** antes de decidir.
-
----
-
-# PROCESSO DE EXECUÇÃO
-
-Siga rigorosamente esta ordem:
-
-### Fase 1 — Análise
-- Leia todos os arquivos fornecidos
-- Liste os contextos/features identificados em formato de tabela:
-
-| Contexto | Page Object Original | Actions a Criar |
-|----------|---------------------|-----------------|
-| Login    | `LoginPage.ts`      | `createLoginActions.ts` |
-
-### Fase 2 — Implementação
-- Crie cada arquivo de Actions
-- Crie/atualize `support/fixtures.ts`
-- Atualize cada spec para usar `{ app }` via fixture
-
-### Fase 3 — Validação
-- Confirme que não restam imports apontando para Page Objects antigos
-- Liste os arquivos antigos que podem ser removidos (não os remova automaticamente)
+1. **Selectors are immutable** — Do NOT change existing CSS/data-testid selectors.
+2. **Assertions are immutable** — Keep `toBeVisible`, `toContainText`, etc. as they are.
+3. **State as return values** — If the old Page Object stored state on `this`
+   (e.g. `this.createdId`), turn it into a function return value or a parameter.
+   Never use module-level/global variables.
+4. **Ambiguity** — If you find a pattern in the legacy code that does not fit
+   these rules (e.g. multiple inheritance, mixins, static utilities),
+   **stop and ask** before deciding.
 
 ---
 
-# ENTREGÁVEL
+# EXECUTION PROCESS
 
-1. **Código refatorado** — todos os arquivos novos/alterados, com path completo
-2. **Tabela de mapeamento** — Page Object antigo → Action(s) nova(s)
-3. **Guia "Como usar"** — máximo 10 linhas, formato bullet point,
-   cobrindo: como criar uma nova action, como registrá-la na fixture,
-   como usá-la num teste
-4. **Mova os arquivos legados**  - para playwright/backup/legacy
+Follow this order strictly:
+
+### Phase 1 — Analysis
+- Read all provided files
+- List identified contexts/features in a table:
+
+| Context | Original Page Object | Actions to Create |
+|---------|----------------------|-------------------|
+| Login   | `LoginPage.ts`       | `createLoginActions.ts` |
+
+### Phase 2 — Implementation
+- Create each Actions file
+- Create/update `support/fixtures.ts`
+- Update each spec to use `{ app }` via the fixture
+
+### Phase 3 — Validation
+- Confirm no imports still point to legacy Page Objects
+- List legacy files that may be removed (do not remove them automatically)
+
+---
+
+# DELIVERABLE
+
+1. **Refactored code** — all new/changed files, with full paths
+2. **Mapping table** — legacy Page Object → new Action(s)
+3. **“How to use” guide** — at most 10 lines, bullet format,
+   covering: how to create a new action, how to register it in the fixture,
+   how to use it in a test
+4. **Move legacy files** — to `playwright/backup/legacy`
 
 ---
