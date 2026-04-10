@@ -1,18 +1,13 @@
-export function generateOrderNumber() {
-  const letras = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const numeros = '0123456789';
+export function generateOrderCode() {
+  const prefix = 'VLO';
 
-  const RandomLetter = () => letras[Math.floor(Math.random() * letras.length)];
-  const RandomNumber = () => numeros[Math.floor(Math.random() * numeros.length)];
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+  let randomPart = '';
 
-  const orderNumber =
-    'VLO-' +
-    RandomLetter() +
-    RandomNumber() +
-    RandomNumber() +
-    RandomLetter() +
-    RandomLetter() +
-    RandomLetter();
+  for (let i = 0; i < 6; i++) {
+      const randomIndex = Math.floor(Math.random() * chars.length);
+      randomPart += chars[randomIndex];
+  }
 
-  return orderNumber;
+  return `${prefix}-${randomPart}`;
 }
